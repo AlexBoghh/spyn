@@ -152,6 +152,7 @@ export type BreakpointView = 'desktop' | 'tablet' | 'mobile';
 export interface ViewportState {
   mode: ViewportMode;
   selectedKeyframeId: string | null;
+  selectedSectionId: string | null;
   scrollProgress: number;         // current scrub position 0-1
   breakpointView: BreakpointView;
   showDebugOverlay: boolean;
