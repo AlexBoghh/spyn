@@ -37,7 +37,12 @@ export function ModelRenderer({ transform = DEFAULT_MODEL_TRANSFORM }: ModelRend
       scale={transform.scale * model.initialScale}
     >
       <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color="#6366f1" wireframe />
+      <meshStandardMaterial
+        color="#6366f1"
+        wireframe
+        transparent={transform.opacity < 1}
+        opacity={transform.opacity}
+      />
     </mesh>
   );
 }
