@@ -44,6 +44,37 @@ Four-panel layout:
   Claude Code to implement without ambiguity
 - Z-depth determines if 3D model renders in front of or behind content
 
+## Skills
+
+This project has 5 custom skills at `.claude/skills/`. Invoke the relevant
+skill BEFORE starting work on any task that matches its triggers:
+
+- **spyn-editor-ui** — Dark-theme editor controls, numeric inputs, property
+  groups, section cards, toolbar buttons. Use when building ANY UI component
+  for Spyn's panels.
+  Triggers: "build UI component", "create editor control", "properties panel",
+  "section builder", "toolbar", "input component"
+
+- **r3f-editor-viewport** — React Three Fiber scene, camera rig, model loading,
+  coordinate mapping (vw/vh → world), edit/preview modes.
+  Triggers: "3D viewport", "load model", "camera controls", "Three.js scene",
+  "R3F", "wireframe", "model preview"
+
+- **scroll-timeline-editor** — Timeline panel, keyframe markers, scrubbing,
+  interpolation engine, easing curves, hold zones.
+  Triggers: "timeline", "keyframe", "scroll animation", "easing", "hold zone",
+  "scrub", "interpolation", "scroll progress"
+
+- **spyn-3d-animations** — Split/explode events, physics simulation, animation
+  presets, responsive breakpoint overrides.
+  Triggers: "split animation", "exploded view", "physics", "momentum",
+  "animation preset", "responsive keyframe"
+
+- **spyn-yaml-export** — YAML export, validation, save/load, copy-to-clipboard,
+  schema enforcement.
+  Triggers: "export YAML", "generate config", "spyn.config", "save project",
+  "load project", "validation"
+
 ## File Structure
 See /src/ for the component and store organization.
 Types are the source of truth — check /src/types/index.ts first.
