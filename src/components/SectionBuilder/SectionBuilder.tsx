@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -21,6 +21,11 @@ export function SectionBuilder() {
   const removeSection = useStore((s) => s.removeSection);
   const updateSection = useStore((s) => s.updateSection);
   const reorderSections = useStore((s) => s.reorderSections);
+  const removeContentBlock = useStore((s) => s.removeContentBlock);
+  const selectedSectionId = useStore((s) => s.selectedSectionId);
+  const selectSection = useStore((s) => s.selectSection);
+
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const handleAdd = useCallback(
     (section: Section) => addSection(section),
@@ -28,13 +33,26 @@ export function SectionBuilder() {
   );
 
   const handleRemove = useCallback(
-    (id: string) => removeSection(id),
-    [removeSection],
+    (id: string) => {
+      removeSection(id);
+      if (selectedSectionId === id) selectSection(null);
+    },
+    [removeSection, selectedSectionId, selectSection],
   );
 
   const handleUpdateHeight = useCallback(
     (id: string, height: number) => updateSection(id, { height }),
     [updateSection],
+  );
+
+  const handleSelect = useCallback(
+    (id: string) => selectSection(selectedSectionId === id ? null : id),
+    [selectSection, selectedSectionId],
+  );
+
+  const handleRemoveBlock = useCallback(
+    (sectionId: string, blockId: string) => removeContentBlock(sectionId, blockId),
+    [removeContentBlock],
   );
 
   const handleDragEnd = useCallback(
@@ -50,10 +68,22 @@ export function SectionBuilder() {
     [sections, reorderSections],
   );
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Delete' && selectedSectionId) {
+        handleRemove(selectedSectionId);
+      }
+    };
+    const el = panelRef.current;
+    el?.addEventListener('keydown', handleKeyDown);
+    return () => el?.removeEventListener('keydown', handleKeyDown);
+  }, [selectedSectionId, handleRemove]);
+
   const sectionIds = sections.map((s) => s.id);
+  const totalHeight = sections.reduce((sum, s) => sum + s.height, 0);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col" ref={panelRef} tabIndex={-1}>
       <div className="flex items-center justify-between border-b border-gray-700 px-4 py-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
           Sections
@@ -69,24 +99,32 @@ export function SectionBuilder() {
             No sections yet. Add one below.
           </p>
         ) : (
-          <DndContext
-            collisionDetection={closestCenter}
-            modifiers={[restrictToVerticalAxis]}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
-              <div className="flex flex-col gap-1">
-                {sections.map((section) => (
-                  <SectionCard
-                    key={section.id}
-                    section={section}
-                    onRemove={handleRemove}
-                    onUpdateHeight={handleUpdateHeight}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+          <>
+            <DndContext
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis]}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
+                <div className="flex flex-col gap-1">
+                  {sections.map((section) => (
+                    <SectionCard
+                      key={section.id}
+                      section={section}
+                      selected={section.id === selectedSectionId}
+                      onSelect={handleSelect}
+                      onRemove={handleRemove}
+                      onUpdateHeight={handleUpdateHeight}
+                      onRemoveBlock={handleRemoveBlock}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+            <div className="text-xs text-gray-500 text-center mt-2 py-1">
+              {totalHeight}vh total
+            </div>
+          </>
         )}
       </div>
 
