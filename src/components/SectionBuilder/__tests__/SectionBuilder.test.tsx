@@ -5,7 +5,7 @@ import { createSection } from '../../../utils/presets';
 import { SectionBuilder } from '../SectionBuilder';
 
 function resetStore() {
-  useStore.setState({ sections: [] });
+  useStore.setState({ sections: [], selectedSectionId: null });
 }
 
 describe('SectionBuilder', () => {
@@ -100,6 +100,65 @@ describe('SectionBuilder', () => {
     useStore.setState({ sections: [section] });
 
     render(<SectionBuilder />);
-    expect(screen.getByText(`${section.contentBlocks.length} blocks`)).toBeInTheDocument();
+    // Block count shown as number next to expand chevron
+    expect(screen.getByText(String(section.contentBlocks.length))).toBeInTheDocument();
+  });
+
+  it('clicking a section card selects it', async () => {
+    const user = userEvent.setup();
+    const section = createSection('hero-banner');
+    useStore.setState({ sections: [section] });
+
+    render(<SectionBuilder />);
+    const card = screen.getByLabelText('Remove Hero Banner').closest('[role="button"]')!;
+    await user.click(card);
+
+    expect(useStore.getState().selectedSectionId).toBe(section.id);
+  });
+
+  it('selected section has highlighted border', () => {
+    const section = createSection('hero-banner');
+    useStore.setState({ sections: [section], selectedSectionId: section.id });
+
+    render(<SectionBuilder />);
+    const card = screen.getByLabelText('Remove Hero Banner').closest('.rounded');
+    expect(card?.className).toContain('border-indigo-500');
+  });
+
+  it('expanding a card shows content block items', async () => {
+    const user = userEvent.setup();
+    const section = createSection('hero-banner');
+    useStore.setState({ sections: [section] });
+
+    render(<SectionBuilder />);
+    // Expand blocks via the chevron button
+    await user.click(screen.getByLabelText('Expand blocks'));
+
+    // hero-banner has 3 blocks: Main Heading, Subheading, CTA Button
+    expect(screen.getByText('Main Heading')).toBeInTheDocument();
+    expect(screen.getByText('Subheading')).toBeInTheDocument();
+    expect(screen.getByText('CTA Button')).toBeInTheDocument();
+  });
+
+  it('deleting a content block removes it from store', async () => {
+    const user = userEvent.setup();
+    const section = createSection('hero-banner');
+    const blockId = section.contentBlocks[0].id;
+    useStore.setState({ sections: [section] });
+
+    render(<SectionBuilder />);
+    await user.click(screen.getByLabelText('Expand blocks'));
+    await user.click(screen.getByLabelText('Remove Main Heading'));
+
+    const updated = useStore.getState().sections[0];
+    expect(updated.contentBlocks.find((b) => b.id === blockId)).toBeUndefined();
+  });
+
+  it('shows total scroll height', () => {
+    useStore.setState({
+      sections: [createSection('hero-banner', 100), createSection('pricing', 150)],
+    });
+    render(<SectionBuilder />);
+    expect(screen.getByText('250vh total')).toBeInTheDocument();
   });
 });
