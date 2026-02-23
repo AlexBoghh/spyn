@@ -1,4 +1,4 @@
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { Keyframe } from '../types';
 
 export interface KeyframeSlice {

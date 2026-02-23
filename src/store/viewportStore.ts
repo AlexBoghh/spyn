@@ -1,4 +1,4 @@
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { ViewportState, ViewportMode, BreakpointView } from '../types';
 
 export interface ViewportSlice extends ViewportState {

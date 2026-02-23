@@ -1,4 +1,4 @@
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { CameraConfig } from '../types';
 
 const defaultCamera: CameraConfig = {

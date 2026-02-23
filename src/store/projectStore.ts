@@ -1,4 +1,4 @@
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { ModelConfig, PhysicsConfig } from '../types';
 
 export interface ProjectSlice {
